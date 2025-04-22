@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Barcode Scanner</title>
+</head>
+<body>
+  <div id="scanner"></div>
+  <p id="result">Scan a barcode...</p>
+
+  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+  <script>
+    const database = [
+      { barcode: "123456789012", name: "Product A", price: "$10" },
+      { barcode: "987654321098", name: "Product B", price: "$20" }
+    ];
+
+    function findProduct(code) {
+      return database.find(item => item.barcode === code);
+    }
+
+    Quagga.init({
+      inputStream: {
+        type: "LiveStream",
+        target: document.querySelector('#scanner')
+      },
+      decoder: {
+        readers: ["ean_reader", "code_128_reader"] // you can add more types
+      }
+    }, function(err) {
+      if (err) return console.error(err);
+      Quagga.start();
+    });
+
+    Quagga.onDetected(function(result) {
+      const code = result.codeResult.code;
+      const match = findProduct(code);
+      document.getElementById('result').textContent = match 
+        ? `Found: ${match.name}, ${match.price}` 
+        : `Not found: ${code}`;
+    });
+  </script>
+</body>
+</html>
